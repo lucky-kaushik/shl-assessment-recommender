@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import os
 import zipfile
-import requests
+import gdown
 from sentence_transformers import SentenceTransformer, util
 
 # Sample questions for assessments
@@ -34,24 +34,19 @@ sample_questions = {
 def load_data():
     return pd.read_csv("shl_products.csv")
 
-# Load model with zip fallback
+# Load transformer model (download from Google Drive)
 @st.cache_resource
 def load_model():
     model_path = "all-MiniLM-L6-v2"
-    
     if not os.path.exists(model_path):
         zip_url = "https://drive.google.com/uc?id=183eNzwaXDwT_pUsvS95GVBpJe_aaIl_k"
         zip_path = "model.zip"
-
-        with open(zip_path, "wb") as f:
-            f.write(requests.get(zip_url).content)
-
+        gdown.download(zip_url, zip_path, quiet=False)
         with zipfile.ZipFile(zip_path, 'r') as zip_ref:
             zip_ref.extractall(".")
-
     return SentenceTransformer(model_path)
 
-# Matching logic
+# Recommender logic
 def recommend_assessments(query, df, model, top_n=5):
     query_embedding = model.encode(query, convert_to_tensor=True)
     corpus_embeddings = model.encode(df["Description"].tolist(), convert_to_tensor=True)
@@ -78,7 +73,6 @@ if st.button("Recommend Assessments") and user_input.strip():
             st.markdown(f"*{row['Description']}*")
             st.markdown(f"**Match Score:** {row['Score']:.2f}")
 
-            # Add sample questions button
             if st.button(f"View Sample Questions", key=f"sample_{i}"):
                 questions = sample_questions.get(row["Product Name"], ["Sample questions not available."])
                 st.markdown("**Sample Questions:**")
@@ -86,5 +80,3 @@ if st.button("Recommend Assessments") and user_input.strip():
                     st.markdown(f"- {q}")
 
             st.markdown("---")
-
-#Update app.py to load model from Google Drive
