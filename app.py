@@ -1,5 +1,8 @@
 import streamlit as st
 import pandas as pd
+import os
+import zipfile
+import requests
 from sentence_transformers import SentenceTransformer, util
 
 # Sample questions for assessments
@@ -26,17 +29,29 @@ sample_questions = {
     ],
 }
 
-
 # Load SHL product data
 @st.cache_data
 def load_data():
     return pd.read_csv("shl_products.csv")
 
-# Load model
+# Load model with zip fallback
 @st.cache_resource
 def load_model():
-    return SentenceTransformer("all-MiniLM-L6-v2")
+    model_path = "all-MiniLM-L6-v2"
+    
+    if not os.path.exists(model_path):
+        zip_url = "https://drive.google.com/uc?id=183eNzwaXDwT_pUsvS95GVBpJe_aaIl_k"
+        zip_path = "model.zip"
 
+        with open(zip_path, "wb") as f:
+            f.write(requests.get(zip_url).content)
+
+        with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+            zip_ref.extractall(".")
+
+    return SentenceTransformer(model_path)
+
+# Matching logic
 def recommend_assessments(query, df, model, top_n=5):
     query_embedding = model.encode(query, convert_to_tensor=True)
     corpus_embeddings = model.encode(df["Description"].tolist(), convert_to_tensor=True)
@@ -46,6 +61,7 @@ def recommend_assessments(query, df, model, top_n=5):
     recommendations["Score"] = scores[top_results].cpu().numpy()
     return recommendations
 
+# Streamlit UI
 st.set_page_config(page_title="SHL Assessment Recommendation Engine", layout="centered")
 st.title("🔍 SHL Assessment Recommendation Engine")
 
@@ -58,16 +74,17 @@ if st.button("Recommend Assessments") and user_input.strip():
     with st.spinner("Finding best SHL assessments..."):
         results = recommend_assessments(user_input, df, model)
         for i, row in results.iterrows():
-         st.markdown(f"### ✅ {row['Product Name']}")
-         st.markdown(f"*{row['Description']}*")
-         st.markdown(f"**Match Score:** {row['Score']:.2f}")
+            st.markdown(f"### ✅ {row['Product Name']}")
+            st.markdown(f"*{row['Description']}*")
+            st.markdown(f"**Match Score:** {row['Score']:.2f}")
 
-    # Add sample questions button
-    if st.button(f"View Sample Questions", key=f"sample_{i}"):
-        questions = sample_questions.get(row["Product Name"], ["Sample questions not available."])
-        st.markdown("**Sample Questions:**")
-        for q in questions:
-            st.markdown(f"- {q}")
+            # Add sample questions button
+            if st.button(f"View Sample Questions", key=f"sample_{i}"):
+                questions = sample_questions.get(row["Product Name"], ["Sample questions not available."])
+                st.markdown("**Sample Questions:**")
+                for q in questions:
+                    st.markdown(f"- {q}")
 
-    st.markdown("---")
+            st.markdown("---")
 
+#Update app.py to load model from Google Drive
