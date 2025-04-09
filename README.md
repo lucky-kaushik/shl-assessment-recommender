@@ -1,34 +1,102 @@
-# shl-assessment-recommender
-A GenAI-powered recommendation engine that suggests SHL assessments based on job descriptions using semantic similarity.
-# 🧠 SHL Assessment Recommendation Engine
+# SHL Assessment Recommendation Engine
 
-This is a web-based AI-powered tool that recommends the most relevant SHL assessments based on a job description, title, or skills using semantic search (RAG-style). Built for SHL's GenAI Internship Assessment Submission.
+🔍 A smart, AI-powered engine that recommends the most relevant SHL assessments based on a job title, description, or key skills.
 
-## 🚀 Features
+---
 
-- 🔍 Accepts any natural language input (job description or role)
-- 🤖 Uses Sentence Transformers to semantically match SHL assessments
-- 📊 Ranks top matches by relevance score
-- 🌐 Fully deployed as a Streamlit web app
-- 🧠 Lightweight and blazing fast
+## 🚀 Live Links
 
-## 📁 Files
+- **🔗 Web App:** [Streamlit App](https://shl-assessment-recommendergit-rpqvyjraka2xnozk66sb3s.streamlit.app/)
+- **🔗 API Endpoint:** [`/recommend`](https://shl-assessment-recommender-api.onrender.com/recommend)
+- **🔗 API Docs:** [`/docs`](https://shl-assessment-recommender-api.onrender.com/docs)
+- **🔗 GitHub:** [GitHub Repo](https://github.com/lucky-kaushik/shl-assessment-recommender)
 
-- `app.py` – Main Streamlit app
-- `shl_products.csv` – SHL assessments catalog
-- `requirements.txt` – Python dependencies
+---
 
-## 🔧 Tech Stack
+## 💡 Features
 
-- Streamlit
-- SentenceTransformers (`all-MiniLM-L6-v2`)
-- Pandas
-- Python
+- 💬 Natural Language Input (job description, title, or skills)
+- 🎯 Embedding-based semantic matching
+- 📊 SHL product descriptions embedded using `sentence-transformers`
+- 📄 Sample Questions shown for each assessment
+- ⚡ FastAPI backend with `/recommend` endpoint
+- 📱 Interactive frontend built using Streamlit
 
-## ▶️ How to Run Locally
+---
 
+## 📦 Technologies Used
+
+- `Streamlit` – Web UI
+- `FastAPI` – RESTful API backend
+- `sentence-transformers` – Semantic similarity
+- `pandas` – Data loading
+- `gdown` – Model download from Google Drive
+- `Render` – Deployment platform
+
+---
+
+## 🔁 How to Run Locally
+
+### 🔹 Frontend (Streamlit App)
 ```bash
-git clone https://github.com/yourusername/shl-assessment-recommender.git
-cd shl-assessment-recommender
+# Create venv and activate it
+python -m venv venv
+venv\Scripts\activate  # On Windows
+
+# Install dependencies
 pip install -r requirements.txt
+
+# Run the Streamlit app
 streamlit run app.py
+```
+
+### 🔹 Backend (FastAPI API)
+```bash
+uvicorn api:app --reload
+# Go to http://localhost:8000/docs to test
+```
+
+---
+
+## 📩 How `/recommend` API Works
+
+- **Endpoint:** `/recommend`
+- **Method:** POST
+- **Request Body (JSON):**
+```json
+{
+  "query": "Sales leader with strong communication"
+}
+```
+- **Response (JSON):**
+```json
+[
+  {
+    "Product Name": "Verbal Reasoning",
+    "Description": "Assesses understanding and interpretation of written information",
+    "Score": 0.91
+  },
+  ...
+]
+```
+
+---
+
+## 📁 Project Structure
+
+- `app.py` – Streamlit UI
+- `api.py` – FastAPI backend
+- `shl_products.csv` – Assessment metadata
+- `requirements.txt` – Dependencies list
+
+---
+
+## ✍️ Author
+
+Developed with dedication and love for the SHL Research Intern Assessment by Lucky Kaushik
+
+---
+
+## 📃 License
+
+MIT License
