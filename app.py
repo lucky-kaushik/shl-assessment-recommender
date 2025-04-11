@@ -73,10 +73,12 @@ if st.button("Recommend Assessments") and user_input.strip():
             st.markdown(f"*{row['Description']}*")
             st.markdown(f"**Match Score:** {row['Score']:.2f}")
 
-            if st.button(f"View Sample Questions", key=f"sample_{i}"):
-                questions = sample_questions.get(row["Product Name"], ["Sample questions not available."])
+            # Sample questions per product name
+            questions = sample_questions.get(row['Product Name'], ["Sample questions not available."])
+            if st.button(f"View Sample Questions for {row['Product Name']}", key=f"sample_{i}"):
                 st.markdown("**Sample Questions:**")
                 for q in questions:
                     st.markdown(f"- {q}")
 
             st.markdown("---")
+
