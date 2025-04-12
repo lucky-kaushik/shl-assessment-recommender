@@ -5,7 +5,7 @@ import zipfile
 import gdown
 from sentence_transformers import SentenceTransformer, util
 
-# Sample questions for assessments
+# Sample questions
 sample_questions = {
     "Cognitive Ability Test": [
         "What is the next number in the sequence: 2, 4, 8, 16, ?",
@@ -29,12 +29,28 @@ sample_questions = {
     ],
 }
 
-# Load SHL product data
+# Smart match function
+def get_matched_sample(product_name):
+    name = product_name.lower()
+    if "numerical" in name:
+        return sample_questions.get("Numerical Reasoning")
+    elif "verbal" in name:
+        return sample_questions.get("Verbal Reasoning")
+    elif "situational" in name:
+        return sample_questions.get("Situational Judgement Test")
+    elif "leadership" in name:
+        return sample_questions.get("Leadership Potential Assessment")
+    elif "cognitive" in name:
+        return sample_questions.get("Cognitive Ability Test")
+    else:
+        return ["Sample questions not available."]
+
+# Load SHL data
 @st.cache_data
 def load_data():
     return pd.read_csv("shl_products.csv")
 
-# Load transformer model (download from Google Drive)
+# Load transformer model
 @st.cache_resource
 def load_model():
     model_path = "all-MiniLM-L6-v2"
@@ -46,7 +62,7 @@ def load_model():
             zip_ref.extractall(".")
     return SentenceTransformer(model_path)
 
-# Recommender logic
+# Recommendation logic
 def recommend_assessments(query, df, model, top_n=5):
     query_embedding = model.encode(query, convert_to_tensor=True)
     corpus_embeddings = model.encode(df["Description"].tolist(), convert_to_tensor=True)
@@ -75,16 +91,11 @@ if st.button("Recommend Assessments") and user_input.strip():
             st.markdown(f"*{row['Description']}*")
             st.markdown(f"**Match Score:** {row['Score']:.2f}")
 
-            # ✅ Use toggle instead of button + session state
-            show_questions = st.toggle(f"View Sample Questions for {product_name}", key=f"toggle_{i}")
-
-            if show_questions:
-                questions = sample_questions.get(product_name, ["Sample questions not available."])
+            # ✅ Toggle to show questions
+            if st.toggle(f"View Sample Questions for {product_name}", key=f"toggle_{i}"):
+                questions = get_matched_sample(product_name)
                 st.markdown("**Sample Questions:**")
                 for q in questions:
                     st.markdown(f"- {q}")
 
             st.markdown("---")
-
-
-
