@@ -69,16 +69,29 @@ if st.button("Recommend Assessments") and user_input.strip():
     with st.spinner("Finding best SHL assessments..."):
         results = recommend_assessments(user_input, df, model)
         for i, row in results.iterrows():
-            st.markdown(f"### ✅ {row['Product Name']}")
+            product_name = row["Product Name"]
+            st.markdown(f"### ✅ {product_name}")
             st.markdown(f"*{row['Description']}*")
             st.markdown(f"**Match Score:** {row['Score']:.2f}")
 
-            # Sample questions per product name
-            questions = sample_questions.get(row['Product Name'], ["Sample questions not available."])
-            if st.button(f"View Sample Questions for {row['Product Name']}", key=f"sample_{i}"):
+            # Create a unique button key
+            button_key = f"sample_{i}"
+
+            # Initialize session state
+            if button_key not in st.session_state:
+                st.session_state[button_key] = False
+
+            # Toggle session state on button click
+            if st.button(f"View Sample Questions for {product_name}", key=button_key):
+                st.session_state[button_key] = not st.session_state[button_key]
+
+            # Show questions if state is toggled
+            if st.session_state[button_key]:
+                questions = sample_questions.get(product_name, ["Sample questions not available."])
                 st.markdown("**Sample Questions:**")
                 for q in questions:
                     st.markdown(f"- {q}")
 
             st.markdown("---")
+
 
